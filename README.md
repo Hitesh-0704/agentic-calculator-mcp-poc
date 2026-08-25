@@ -1,4 +1,4 @@
-🧮 Agentic Calculator MCP
+                                     🧮 Agentic Calculator MCP
 
 <p align="center">
   <strong>Natural-language calculations powered by Google Gemini, Model Context Protocol (MCP), FastAPI, and React.</strong>
