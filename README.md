@@ -1,319 +1,366 @@
-                                     🧮 Agentic Calculator MCP
+# 🧮 Agentic Calculator MCP
 
 <p align="center">
-  <strong>Natural-language calculations powered by Google Gemini, Model Context Protocol (MCP), FastAPI, and React.</strong>
+  <strong>AI-powered natural-language calculator using Google Gemini, Model Context Protocol (MCP), FastAPI, and React/Vite.</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=111827" alt="React">
-  <img src="https://img.shields.io/badge/Vite-Frontend%20Tooling-646CFF?logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/MCP-SDK%202.1.0-6B4FBB" alt="MCP SDK 2.1.0">
-  <img src="https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white" alt="Gemini 2.5 Flash">
+  <img src="https://img.shields.io/badge/Vite-Frontend-646CFF?logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/MCP-SDK%202.1.0-6B4FBB" alt="MCP SDK">
+  <img src="https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white" alt="Gemini">
 </p>
 
 <p align="center">
-  <a href="#-overview">Overview</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-key-features">Features</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-api">API</a> •
-  <a href="#-testing">Testing</a> •
-  <a href="#-demo">Demo</a>
+  <b>Gemini understands the request → MCP selects and executes the tool → FastAPI returns the result → React presents it.</b>
 </p>
 
-✨ Overview
+---
 
-Agentic Calculator MCP is a full-stack AI calculator that turns natural-language requests into controlled tool calls.
+## 📌 Overview
 
-Instead of allowing the language model to perform arithmetic directly, the project separates reasoning from execution:
+**Agentic Calculator MCP** is a full-stack AI-powered calculator designed to demonstrate how a modern AI agent can interact with external tools through the **Model Context Protocol (MCP)**.
 
-Gemini understands the user's request and selects the appropriate operation.
+Instead of allowing the language model to perform the arithmetic directly, the application separates **AI reasoning** from **deterministic execution**.
 
-MCP Client discovers and invokes calculator capabilities through the Model Context Protocol.
+The system uses:
 
-MCP Server performs the authoritative arithmetic.
+- **Google Gemini** for natural-language understanding and tool selection
+- **MCP Client** for discovering and invoking tools
+- **MCP Server** for deterministic calculator operations
+- **FastAPI** for backend orchestration and APIs
+- **React + Vite** for the user interface
 
-FastAPI orchestrates the agent workflow and exposes the backend API.
+### 🎯 Core Principle
 
-React/Vite provides the interactive user interface and visualizes the request-processing flow.
+> **Let the model understand the problem. Let the tool solve the problem.**
 
-The core idea
+Gemini decides **what needs to be done**.
 
-The AI decides what tool to use. The MCP tool performs the calculation.
+The MCP calculator performs **the actual arithmetic**.
 
-This makes the project a compact but realistic demonstration of AI agents + tool calling + MCP + API orchestration + modern frontend development.
+---
 
-🎯 What the Project Demonstrates
+# 🏗️ Architecture
 
-This project is intentionally designed around a real agentic workflow rather than a calculator hidden behind an AI-looking interface.
+```text
+                         USER
+                           │
+                           │ Natural-language request
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     REACT + VITE                            │
+│                  Frontend Calculator UI                     │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             │ POST /api/chat
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       FASTAPI                               │
+│              Backend / Agent Orchestration                  │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    GEMINI AGENT                             │
+│                                                             │
+│  Understand request → Determine operation → Select tool    │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             │ Tool selection
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      MCP CLIENT                             │
+│                                                             │
+│        Discover tools → Invoke selected MCP tool            │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             │ MCP over STDIO
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      MCP SERVER                             │
+│                                                             │
+│    ┌────────┐ ┌──────────┐ ┌──────────┐ ┌────────┐         │
+│    │  add   │ │ subtract │ │ multiply │ │ divide │         │
+│    └────────┘ └──────────┘ └──────────┘ └────────┘         │
+│                                                             │
+│                 AUTHORITATIVE ARITHMETIC                    │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             │ Result
+                             ▼
+                       MCP Client
+                             │
+                             ▼
+                          Gemini
+                             │
+                             ▼
+                         FastAPI
+                             │
+                             ▼
+                          React
+                             │
+                             ▼
+                            USER
+```
 
-User asks
+---
 
+# 🔄 How the Agent Works
+
+Suppose the user enters:
+
+```text
+Multiply 25 by 8
+```
+
+The request flows through the system:
+
+```text
+User
+ │
+ ▼
 "Multiply 25 by 8"
+ │
+ ▼
+Gemini
+ │
+ │ Understands intent
+ │
+ │ Operation = multiply
+ │ Operands = 25, 8
+ ▼
+MCP Client
+ │
+ │ Selects multiply tool
+ ▼
+MCP Server
+ │
+ │ multiply(25, 8)
+ ▼
+200
+ │
+ ▼
+Gemini
+ │
+ │ Generates natural-language response
+ ▼
+FastAPI
+ │
+ ▼
+React UI
+```
 
-Agent workflow
+### Important Design Decision
 
-Natural Language
-      │
-      ▼
-   Gemini
-      │
-      │ Understands intent
-      │ Selects calculator tool
-      ▼
-  MCP Client
-      │
-      │ Discovers / invokes tool
-      ▼
-  MCP Server
-      │
-      │ multiply(25, 8)
-      ▼
-    200
-      │
-      ▼
-  Gemini
-      │
-      ▼
-Natural-language response
+Gemini does **not** perform:
 
-The arithmetic itself remains outside the model.
+```text
+25 × 8
+```
 
-🏗️ Architecture
+The MCP calculator performs it.
 
-┌───────────────────────────────────────────────────────────────┐
-│                         React / Vite                         │
-│                  Natural-language calculator UI              │
-└───────────────────────────────┬───────────────────────────────┘
-                                │
-                                │ POST /api/chat
-                                ▼
-┌───────────────────────────────────────────────────────────────┐
-│                          FastAPI                              │
-│                 API + Agent Orchestration                    │
-└───────────────────────────────┬───────────────────────────────┘
-                                │
-                                ▼
-┌───────────────────────────────────────────────────────────────┐
-│                       Gemini Agent                            │
-│       Understand request → select operation/tool             │
-└───────────────────────────────┬───────────────────────────────┘
-                                │
-                                │ Tool selection
-                                ▼
-┌───────────────────────────────────────────────────────────────┐
-│                         MCP Client                            │
-│             Discover tools → invoke selected tool            │
-└───────────────────────────────┬───────────────────────────────┘
-                                │
-                                │ MCP over STDIO
-                                ▼
-┌───────────────────────────────────────────────────────────────┐
-│                         MCP Server                            │
-│                                                               │
-│     add   │   subtract   │   multiply   │   divide           │
-│                                                               │
-│              Authoritative arithmetic                         │
-└───────────────────────────────┬───────────────────────────────┘
-                                │
-                                ▼
-                              Result
-                                │
-                                ▼
-                    MCP Client → Gemini
-                                │
-                                ▼
-                           FastAPI → UI
+This keeps deterministic computation outside the probabilistic language model.
 
-Important architectural decision
+---
 
-The calculator implementation is deliberately isolated inside the MCP server.
+# 🚀 Features
 
-Gemini is not the source of truth for arithmetic.
+## 🤖 AI-Powered Natural Language
 
-That separation demonstrates a key agentic design principle:
+Users can communicate with the calculator using normal language.
 
-LLM for interpretation and decision-making; deterministic tools for execution.
+Examples:
 
-🚀 Key Features
+```text
+Multiply 25 by 8
+```
 
-🤖 Gemini-powered agent
+```text
+What is 17 plus 28?
+```
 
-Understands natural-language calculator requests and selects the appropriate operation.
+```text
+Subtract 25 from 100
+```
 
-🔌 Real MCP integration
+```text
+Divide 144 by 12
+```
 
-Uses the official MCP Python SDK with the v2 API surface and STDIO transport.
+The user does not need to provide a structured JSON operation.
 
-🔎 Dynamic tool discovery
+---
 
-The backend discovers calculator tools from the MCP server instead of hard-coding the available tool list into the UI.
+## 🔌 Model Context Protocol
 
-🧮 Deterministic arithmetic
+The project uses the official MCP Python SDK v2 line.
 
-add, subtract, multiply, and divide execute inside the MCP server.
+The MCP server exposes calculator capabilities as tools.
 
-🛡️ Controlled tool execution
+Available tools:
 
-Only discovered calculator tools are eligible for invocation.
+```text
+add
+subtract
+multiply
+divide
+```
 
-🔄 Fallback intent parser
+The backend MCP client connects to the MCP server through:
 
-If Gemini is unavailable, the backend can fall back to a clearly labelled intent parser for the four supported operations.
-
-The fallback determines:
-
-operation
-
-operands
-
-It does not perform the arithmetic itself.
-
-The actual calculation still goes through MCP.
-
-⚠️ Controlled error handling
-
-Examples include:
-
-division by zero
-
-invalid requests
-
-unavailable MCP service
-
-backend failures
-
-📊 Request Processing visualization
-
-The UI exposes the agent workflow, including:
-
-User request
-
-AI understanding
-
-Operation
-
-Operands
-
-MCP tool
-
-MCP execution
-
-Result
-
-Final agent response
-
-🧰 Tech Stack
-
-Layer
-
-Technology
-
-AI
-
-Google Gemini
-
-Gemini SDK
-
-google-genai
-
-Gemini Model
-
-gemini-2.5-flash
-
-Agent Backend
-
-FastAPI + Uvicorn
-
-Tool Protocol
-
-Model Context Protocol
-
-MCP SDK
-
-Official Python SDK 2.1.0
-
-MCP Transport
-
+```text
 STDIO
+```
 
-Validation
+---
 
-Pydantic v2
+## 🔎 Dynamic MCP Tool Discovery
 
-Frontend
+The backend discovers available calculator tools through MCP.
 
-React
+Instead of relying only on a manually maintained list, the application can query the MCP server and discover its capabilities.
 
-Frontend Tooling
+The API exposes this through:
 
-Vite
+```text
+GET /api/mcp/tools
+```
 
-HTTP Client
+---
 
-HTTPX
+## 🧮 Deterministic Calculator Execution
 
-Testing
+The arithmetic is performed by the MCP server.
 
-Pytest + pytest-asyncio
+```text
+Gemini
+   ↓
+Tool Selection
+   ↓
+MCP Client
+   ↓
+MCP Server
+   ↓
+Calculator Function
+   ↓
+Result
+```
 
-Language
+This creates a clear separation:
 
-Python 3.11+ / JavaScript
+```text
+AI Layer
+   ↓
+Reasoning + Intent + Tool Selection
 
-Compatibility
+MCP Layer
+   ↓
+Tool Execution + Arithmetic
+```
 
-This project is pinned to:
+---
 
-MCP Python SDK 2.1.0
+## 🔄 Fallback Intent Parser
 
-and uses the v2 MCPServer / Client APIs.
+The backend contains a clearly labelled fallback intent parser for the four supported calculator operations.
 
-📁 Project Structure
+If Gemini is unavailable, the fallback parser can determine:
 
+```text
+Operation
+Operands
+```
+
+However, the fallback parser does **not** perform the arithmetic.
+
+The calculation still goes through the MCP calculator tool.
+
+```text
+User
+ ↓
+Fallback Parser
+ ↓
+Operation + Operands
+ ↓
+MCP Tool
+ ↓
+Calculator
+ ↓
+Result
+```
+
+---
+
+## 🛡️ Controlled Error Handling
+
+The application handles conditions such as:
+
+- Division by zero
+- Invalid input
+- Unsupported requests
+- MCP unavailable
+- Backend errors
+- Validation failures
+
+Example:
+
+```text
+Divide 10 by 0
+```
+
+The system should return a controlled error instead of producing an invalid result.
+
+---
+
+# 🧰 Technology Stack
+
+| Component | Technology |
+|---|---|
+| Programming Language | Python 3.11+ |
+| AI Model | Google Gemini |
+| Gemini SDK | `google-genai` |
+| Gemini Model | `gemini-2.5-flash` |
+| MCP | Model Context Protocol |
+| MCP SDK | Official Python SDK 2.1.0 |
+| MCP Transport | STDIO |
+| Backend | FastAPI |
+| ASGI Server | Uvicorn |
+| Validation | Pydantic v2 |
+| Frontend | React |
+| Frontend Tooling | Vite |
+| Testing | Pytest |
+| API Testing | HTTPX |
+
+---
+
+# 📁 Project Structure
+
+```text
 agentic-calculator-mcp-poc/
 │
 ├── backend/
+│   │
 │   ├── app/
 │   │   ├── agent/
-│   │   │   ├── gemini_client.py
-│   │   │   └── prompts.py
-│   │   │
 │   │   ├── api/
-│   │   │   └── routes.py
-│   │   │
 │   │   ├── core/
-│   │   │   ├── config.py
-│   │   │   ├── exceptions.py
-│   │   │   └── logging.py
-│   │   │
 │   │   ├── fallback/
-│   │   │   └── parser.py
-│   │   │
 │   │   ├── mcp/
-│   │   │   ├── client.py
-│   │   │   └── manager.py
-│   │   │
 │   │   ├── models/
-│   │   │   └── schemas.py
-│   │   │
 │   │   ├── services/
-│   │   │   └── calculator_service.py
-│   │   │
 │   │   └── main.py
 │   │
 │   ├── tests/
-│   │   ├── test_api.py
-│   │   ├── test_calculator.py
-│   │   ├── test_fallback.py
-│   │   └── test_formatting_and_service.py
 │   │
 │   ├── .env.example
 │   └── requirements.txt
 │
 ├── frontend/
+│   │
 │   ├── src/
 │   ├── index.html
 │   ├── package.json
@@ -329,221 +376,440 @@ agentic-calculator-mcp-poc/
 ├── .gitignore
 ├── LICENSE
 └── README.md
+```
 
-⚡ Quick Start
+---
 
-Prerequisites
+# ⚙️ Prerequisites
 
-Install:
+Before running the project, install:
 
-Python 3.11+
+- Python **3.11 or newer**
+- Node.js **18 or newer**
+- npm
+- A Google Gemini API key
 
-Node.js 18+
+---
 
-npm
+# 🚀 Quick Start
 
-A Gemini API key
+## 1. Clone the Repository
 
-1. Clone the repository
-
+```powershell
 git clone https://github.com/Hitesh-0704/agentic-calculator-mcp-poc.git
+```
+
+Enter the project:
+
+```powershell
 cd agentic-calculator-mcp-poc
+```
 
-2. Create the Python environment
+---
 
+# 🐍 Backend Setup
+
+## 2. Open the Backend Directory
+
+```powershell
 cd backend
+```
+
+---
+
+## 3. Create a Python Virtual Environment
+
+```powershell
 python -m venv .venv
+```
 
-Windows PowerShell
+Activate it:
 
+```powershell
 .\.venv\Scripts\Activate.ps1
+```
 
-If activation is blocked by PowerShell policy, use Command Prompt:
+If PowerShell execution policy prevents activation, Command Prompt can be used:
 
+```cmd
 .venv\Scripts\activate.bat
+```
 
-3. Install backend dependencies
+---
 
+## 4. Install Backend Dependencies
+
+Upgrade pip:
+
+```powershell
 python -m pip install --upgrade pip
+```
+
+Install project dependencies:
+
+```powershell
 pip install -r requirements.txt
+```
 
-The MCP SDK is intentionally pinned to:
+The MCP SDK is pinned to:
 
+```text
 mcp[cli]==2.1.0
+```
 
-4. Configure Gemini
+This keeps the project compatible with the intended MCP v2 API implementation.
 
-Create your local environment file:
+---
 
+# 🔑 Gemini API Configuration
+
+## 5. Create the Environment File
+
+From the `backend` directory:
+
+```powershell
 Copy-Item .env.example .env
+```
 
-Then edit:
+Open:
 
+```text
 backend/.env
+```
 
-Add your API key:
+Add your Gemini configuration:
 
+```env
 GEMINI_API_KEY=your_key_here
 GEMINI_MODEL=gemini-2.5-flash
+```
 
-Additional backend configuration can be supplied through the variables documented in .env.example.
+### 🔐 Security Warning
 
-Never commit .env. It contains secrets and is intentionally ignored by Git.
+Never commit your real `.env` file to GitHub.
 
-5. Start the backend
+Your API key should remain local.
 
-From backend:
+The repository should contain:
 
+```text
+.env.example
+```
+
+but not:
+
+```text
+.env
+```
+
+---
+
+# ▶️ Start the Backend
+
+## 6. Run FastAPI
+
+From the `backend` directory:
+
+```powershell
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
 
-The FastAPI process automatically starts the MCP calculator server as a child process over STDIO.
+The backend will start on:
 
-You do NOT need a separate terminal for the MCP server.
+```text
+http://127.0.0.1:8000
+```
 
-6. Start the frontend
+### MCP Server
 
-Open a second terminal:
+You do **not** need to manually start another MCP server terminal.
 
-cd agentic-calculator-mcp-poc/frontend
+The FastAPI backend automatically starts the MCP calculator server as a child process and communicates with it through STDIO.
+
+---
+
+# ⚛️ Frontend Setup
+
+## 7. Open a Second Terminal
+
+Keep the backend terminal running.
+
+Open another PowerShell terminal and return to the project root:
+
+```powershell
+cd agentic-calculator-mcp-poc
+```
+
+Go to the frontend:
+
+```powershell
+cd frontend
+```
+
+---
+
+## 8. Install Frontend Dependencies
+
+```powershell
 npm install
+```
+
+---
+
+## 9. Start the Frontend
+
+```powershell
 npm run dev
+```
 
-Open the URL printed by Vite, normally:
+Vite normally starts the frontend at:
 
+```text
 http://localhost:5173
+```
 
-🩺 Verify the Backend
+Open the URL shown by Vite in your browser.
 
-Once the backend is running, open:
+---
 
+# 🩺 Backend Health Checks
+
+Once the backend is running, use these endpoints.
+
+## Swagger / OpenAPI
+
+```text
 http://127.0.0.1:8000/docs
+```
 
-FastAPI Swagger UI provides the available API operations.
+This provides the interactive API documentation.
 
-Health
+---
 
-GET /api/health
+## Health Check
 
-MCP status
+```text
+http://127.0.0.1:8000/api/health
+```
 
-GET /api/mcp/status
+This endpoint is used to verify backend health.
 
-MCP tools
+---
 
-GET /api/mcp/tools
+## MCP Status
 
-Agent chat
+```text
+http://127.0.0.1:8000/api/mcp/status
+```
 
-POST /api/chat
+This can be used to inspect MCP connection status.
 
-http://127.0.0.1:8000/ may return {"detail":"Not Found"} because the application intentionally exposes its API under /api/*. Use /api/health or /docs to verify the service.
+---
 
-🔌 MCP Workflow
+## MCP Tools
 
-The MCP layer is not decorative. It is part of the actual execution path.
+```text
+http://127.0.0.1:8000/api/mcp/tools
+```
 
-1. Backend starts
+This exposes the dynamically discovered MCP calculator tools.
 
-FastAPI initializes the MCP manager.
+---
 
-2. MCP server starts
+## Root URL
 
-The calculator MCP server runs as a child process using STDIO.
+The following URL:
 
-3. Client connects
+```text
+http://127.0.0.1:8000/
+```
 
-The backend-side MCP client establishes the connection.
+may return:
 
-4. Tools are discovered
+```json
+{
+  "detail": "Not Found"
+}
+```
 
-The client asks the MCP server what tools are available.
+This is expected if no root `/` route is defined.
 
-5. Gemini selects a tool
+Use:
+
+```text
+http://127.0.0.1:8000/api/health
+```
+
+or:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+to verify the backend.
+
+---
+
+# 🔌 MCP Execution
+
+The MCP server exposes calculator tools.
+
+```text
+add
+subtract
+multiply
+divide
+```
+
+The backend MCP client discovers these tools and invokes the selected operation.
 
 For example:
 
-"Multiply 25 by 8"
-          ↓
-      multiply
-
-6. MCP invokes the tool
-
+```text
 multiply(25, 8)
+```
 
-7. MCP server performs arithmetic
+The MCP calculator performs:
 
-200
+```text
+25 × 8 = 200
+```
 
-8. Result returns through the agent pipeline
+The result is then returned to the agent pipeline.
 
-MCP Server
-    ↓
-MCP Client
-    ↓
-Gemini
-    ↓
-FastAPI
-    ↓
-React
+---
 
-🧪 Testing
+# 🔍 MCP Tool Discovery
 
-From the backend directory:
+The system can expose discovered tools through:
 
+```text
+GET /api/mcp/tools
+```
+
+Expected calculator capabilities include:
+
+```text
+add
+subtract
+multiply
+divide
+```
+
+This demonstrates that the application is using the MCP server as a real tool provider.
+
+---
+
+# 📡 API Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Backend health check |
+| `GET` | `/api/mcp/status` | MCP connection/status |
+| `GET` | `/api/mcp/tools` | Dynamically discovered MCP tools |
+| `POST` | `/api/chat` | Natural-language calculator request |
+| `GET` | `/docs` | Swagger/OpenAPI documentation |
+
+---
+
+# 🧪 Testing
+
+The backend contains automated tests.
+
+Go to:
+
+```powershell
+cd backend
+```
+
+Activate the virtual environment if necessary:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Run:
+
+```powershell
 pytest -q
+```
 
-The test suite covers areas including:
+The tests cover areas including:
 
-calculator logic
+- Calculator logic
+- Fallback intent parsing
+- API validation
+- MCP discovery
+- MCP invocation
+- In-memory MCP client testing
+- HTTP/API behaviour
 
-fallback intent parsing
+---
 
-API validation
+# 🎬 Demo
 
-formatting/service behavior
+The application supports natural-language calculator requests.
 
-MCP discovery/invocation through the official SDK's in-memory client
+Try:
 
-🎬 Demo Scenarios
-
-Try these requests in the UI:
-
+```text
 Multiply 25 by 8
+```
 
+```text
 Add 3 and 4
+```
 
+```text
 What is 17 plus 28?
+```
 
+```text
 Subtract 25 from 100
+```
 
+```text
 Divide 144 by 12
+```
 
+```text
 Divide 10 by 0
+```
 
-What's the weather today?
+---
 
-The last two are useful for demonstrating controlled error handling and unsupported intent handling.
+# 🏆 Recommended 5-Minute Presentation
 
-🏆 Recommended 5-Minute Demo
-
-1. Show the application
+## Step 1 — Show the UI
 
 Point out:
 
-Gemini connection status
+```text
+Gemini Connected
+MCP Connected
+```
 
-MCP connection status
+and the discovered calculator tools.
 
-dynamically discovered tools
+---
 
-2. Ask
+## Step 2 — Send a Request
 
+Enter:
+
+```text
 Multiply 25 by 8
+```
 
-3. Open Request Processing
+---
 
-Walk through:
+## Step 3 — Show Request Processing
 
+Open the request-processing section.
+
+Show the pipeline:
+
+```text
 User Request
      ↓
 AI Understanding
@@ -559,281 +825,562 @@ MCP Execution
 Result
      ↓
 Agent Response
+```
 
-4. Explain the architecture
+---
 
-"Gemini understands the natural-language request and selects the calculator operation. The MCP client invokes the real calculator tool exposed by the MCP server. The MCP server performs the arithmetic, so the language model is not the arithmetic authority."
+## Step 4 — Explain the Architecture
 
-5. Demonstrate an error
+Use this explanation:
+
+> Gemini understands the natural-language request and determines which calculator operation is required. The MCP client then invokes the real calculator tool exposed by the MCP server. The MCP server performs the arithmetic and returns the result. Gemini can then formulate the final natural-language response.
+
+---
+
+## Step 5 — Demonstrate Another Request
 
 Try:
 
+```text
+Add 17 and 28
+```
+
+---
+
+## Step 6 — Demonstrate Error Handling
+
+Try:
+
+```text
 Divide 10 by 0
+```
 
-Use this to demonstrate controlled error handling.
+Explain that division-by-zero is handled by the calculator/tool layer rather than allowing the AI to invent a result.
 
-6. Show dynamic MCP discovery
+---
+
+## Step 7 — Demonstrate MCP Discovery
 
 Open:
 
+```text
 http://127.0.0.1:8000/docs
+```
 
-Then demonstrate:
+Use:
 
+```text
 GET /api/mcp/tools
+```
 
-Explain that the available calculator tools come from actual MCP discovery.
+Explain:
 
-🧠 Why MCP?
+> The calculator tools are discovered from the MCP server rather than simply being hard-coded into the frontend.
 
-A traditional implementation could simply put calculator functions directly inside the FastAPI application.
+---
 
-This project intentionally does not do that.
+# 🧠 Interview / Viva Questions
 
-MCP creates a clean boundary:
+## What is an AI Agent?
 
-AI / Agent Layer
-       │
-       │ standardized tool protocol
-       ▼
-    MCP Layer
-       │
-       ▼
- External Tool Capability
+The Gemini-powered layer that interprets the user's request, determines what capability is needed, selects the appropriate tool, and generates a natural-language response from the tool result.
 
-That makes the calculator capability independently discoverable and invokable.
+---
 
-The same pattern can be extended to other tool categories such as:
+## What is MCP?
 
-databases
+**Model Context Protocol (MCP)** is a standardized protocol for connecting AI applications with external tools and context.
 
-file systems
+It provides a structured way for an AI application to discover and interact with external capabilities.
 
-enterprise APIs
+---
 
-search
+## Why did you use MCP?
 
-business systems
+The purpose of this project is to demonstrate separation between:
 
-developer tools
+```text
+AI Reasoning
+      ↓
+Tool Discovery
+      ↓
+Tool Selection
+      ↓
+Tool Execution
+```
 
-The calculator is intentionally small so the underlying agent + tool architecture is easy to understand.
+MCP provides the standardized tool communication layer.
 
-🧩 Fallback Design
+---
 
-When Gemini is unavailable, the backend can use a clearly labelled fallback intent parser for the four supported calculator operations.
+## What is the MCP Server?
 
-The fallback parser:
+The MCP server is a separate process that exposes calculator functionality as MCP tools.
 
-User text
-   ↓
-Detect operation
-   ↓
-Extract operands
-   ↓
-Call MCP tool
-   ↓
-Return result
+The tools are:
 
-It does not calculate the answer itself.
-
-This preserves the architectural rule:
-
-Arithmetic belongs to the MCP calculator tool.
-
-🔐 Security & Reliability
-
-The project includes several safeguards:
-
-API keys are environment-only.
-
-.env is ignored by Git.
-
-Input is length-limited and validated.
-
-Only discovered calculator tools can be invoked.
-
-MCP subprocess configuration is controlled by application code rather than user input.
-
-Backend errors are sanitized before reaching the browser.
-
-API keys and environment variables are not intentionally logged.
-
-Division-by-zero is handled as a controlled calculator error.
-
-MCP failures are surfaced as clean application errors rather than silently bypassing the tool layer.
-
-💬 Interview / Viva Explanation
-
-What is an AI Agent?
-
-The Gemini-powered layer interprets the user's request, determines whether a calculator capability is needed, selects the appropriate tool, and converts the tool result into a natural-language response.
-
-What is MCP?
-
-Model Context Protocol is a standardized protocol for connecting AI applications with external tools and context.
-
-Why use MCP for a calculator?
-
-The goal is not to make the calculator itself complicated. The calculator demonstrates a clean separation between:
-
-AI reasoning
-
-tool discovery
-
-tool invocation
-
-deterministic execution
-
-What is the MCP Server?
-
-A separate process exposing:
-
+```text
 add
 subtract
 multiply
 divide
+```
 
-as MCP tools.
+---
 
-What is the MCP Client?
+## What is the MCP Client?
 
-The backend-side MCP client that:
+The MCP client runs on the backend side.
 
-connects to the server
+It is responsible for:
 
-discovers available tools
+1. Connecting to the MCP server
+2. Discovering available tools
+3. Selecting/invoking the required tool
+4. Receiving the tool result
 
-invokes the selected tool
+---
 
-receives the result
+## Where does the calculation happen?
 
-Where does the calculation happen?
+The actual arithmetic happens inside the MCP calculator functions.
 
-Inside the MCP server's calculator functions.
+The Gemini model does not act as the authoritative calculator.
 
-Why doesn't Gemini calculate directly?
+---
 
-Because the architecture intentionally treats Gemini as the reasoning/tool-selection layer, while the MCP server is the execution layer.
+## Why doesn't Gemini calculate directly?
 
-What happens if MCP goes down?
+Because the project is demonstrating tool-based agent architecture.
 
-The API returns a controlled MCP-unavailable error. Gemini is not allowed to bypass the MCP calculation requirement.
+Gemini is responsible for:
 
-📌 API Reference
+```text
+Understanding
+Reasoning
+Tool Selection
+```
 
-Method
+The MCP server is responsible for:
 
-Endpoint
+```text
+Deterministic Arithmetic
+```
 
-Purpose
+This creates a cleaner separation of responsibilities.
 
-GET
+---
 
-/api/health
+## What happens if MCP goes down?
 
-Backend health
+The application reports an MCP-unavailable error.
 
-GET
+The agent is not supposed to silently bypass the MCP calculator and perform the calculation itself.
 
-/api/mcp/status
+---
 
-MCP connection/status
+## What happens if Gemini is unavailable?
 
-GET
+The application has a clearly labelled fallback intent parser for the supported calculator operations.
 
-/api/mcp/tools
+The fallback determines:
 
-Dynamically discovered tools
+```text
+Operation
+Operands
+```
 
-POST
+but the actual arithmetic still goes through MCP.
 
-/api/chat
+---
 
-Natural-language agent interaction
+# 🔄 Fallback Flow
 
-GET
+```text
+                 User Request
+                      │
+                      ▼
+              Gemini Available?
+                 /          \
+               YES           NO
+                │             │
+                ▼             ▼
+             Gemini      Fallback Parser
+                │             │
+                └──────┬──────┘
+                       │
+                       ▼
+               Operation + Operands
+                       │
+                       ▼
+                  MCP Client
+                       │
+                       ▼
+                  MCP Server
+                       │
+                       ▼
+                  Calculator
+                       │
+                       ▼
+                    Result
+```
 
-/docs
+---
 
-Swagger/OpenAPI documentation
+# 🔐 Security
 
-🛠️ Development Notes
+The project follows several security practices.
 
-Backend
+### API Key Protection
 
+The Gemini API key is stored in environment configuration:
+
+```text
+backend/.env
+```
+
+and should never be committed to source control.
+
+---
+
+### Input Validation
+
+User input is validated before processing.
+
+---
+
+### Input Length Limits
+
+Input length is constrained to reduce unnecessary or unexpected payloads.
+
+---
+
+### Controlled MCP Tools
+
+Only the intended calculator tools can be invoked.
+
+---
+
+### Controlled MCP Process
+
+The MCP subprocess command is defined by application configuration rather than arbitrary user input.
+
+---
+
+### Sanitized Errors
+
+Backend errors are handled and sanitized before being returned to the browser.
+
+---
+
+### No API Key Logging
+
+API keys and environment secrets should never be intentionally logged.
+
+---
+
+# 🌟 Design Principles
+
+## 1. Separate Reasoning From Execution
+
+```text
+Gemini → Understands and Decides
+MCP    → Executes
+```
+
+---
+
+## 2. Deterministic Tools for Deterministic Tasks
+
+Arithmetic should be handled by deterministic application code instead of relying on probabilistic model output.
+
+---
+
+## 3. Dynamic Capability Discovery
+
+MCP allows the backend to discover available tools from the MCP server.
+
+---
+
+## 4. Explicit Failure
+
+If MCP is unavailable, the application should report the failure rather than silently bypassing the intended execution path.
+
+---
+
+## 5. Secrets Stay Local
+
+Credentials belong in environment variables and should never be committed to GitHub.
+
+---
+
+# 📊 Request Processing
+
+The frontend can expose the internal processing pipeline:
+
+```text
+┌───────────────────────┐
+│    User Request       │
+└───────────┬───────────┘
+            ▼
+┌───────────────────────┐
+│   AI Understanding    │
+└───────────┬───────────┘
+            ▼
+┌───────────────────────┐
+│      Operation        │
+└───────────┬───────────┘
+            ▼
+┌───────────────────────┐
+│       Operands        │
+└───────────┬───────────┘
+            ▼
+┌───────────────────────┐
+│      MCP Tool         │
+└───────────┬───────────┘
+            ▼
+┌───────────────────────┐
+│    MCP Execution      │
+└───────────┬───────────┘
+            ▼
+┌───────────────────────┐
+│        Result         │
+└───────────┬───────────┘
+            ▼
+┌───────────────────────┐
+│   Agent Response      │
+└───────────────────────┘
+```
+
+---
+
+# 💡 Why This Project Matters
+
+The calculator itself is intentionally simple.
+
+The important part is the architecture.
+
+The same pattern can be extended to much more complex AI systems.
+
+For example:
+
+```text
+                 AI Agent
+                    │
+                    ▼
+                   MCP
+          ┌─────────┼─────────┐
+          ▼         ▼         ▼
+       Database    APIs     Files
+          │         │         │
+          ▼         ▼         ▼
+       Tools     Tools     Tools
+```
+
+Instead of building an AI system that directly performs every task, the model can reason about the task and use specialized external tools.
+
+---
+
+# 🔮 Possible Future Extensions
+
+The architecture can be extended with additional MCP tools such as:
+
+```text
+Weather Tool
+Currency Conversion
+Database Queries
+Web Search
+File Search
+Unit Conversion
+Date / Time Utilities
+Enterprise APIs
+```
+
+The calculator therefore serves as a small demonstration of a broader tool-using agent architecture.
+
+---
+
+# 🛠️ Development Commands
+
+## Backend
+
+```powershell
 cd backend
 .\.venv\Scripts\Activate.ps1
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
 
-Frontend
+## Frontend
 
+```powershell
 cd frontend
 npm install
 npm run dev
+```
 
-Tests
+## Tests
 
+```powershell
 cd backend
 pytest -q
+```
 
-🌟 Design Principles
+---
 
-This project follows a few deliberate principles:
+# 📚 Project Documentation
 
-1. Separate reasoning from execution
+Additional documentation available in the repository:
 
-Gemini → decides
-MCP    → executes
+- [`START_HERE.md`](START_HERE.md) — Getting started instructions
+- [`architecture.md`](architecture.md) — Architecture details
+- [`backend/requirements.txt`](backend/requirements.txt) — Backend dependencies
+- [`frontend/package.json`](frontend/package.json) — Frontend dependencies
+- [`LICENSE`](LICENSE) — Project license
 
-2. Prefer deterministic tools for deterministic work
+---
 
-Arithmetic should not depend on probabilistic model output.
+# 📦 Dependency Philosophy
 
-3. Discover capabilities dynamically
+The repository intentionally does **not** include local environments or installed dependency folders.
 
-The frontend can reflect the tools exposed by the MCP server rather than maintaining a separate hard-coded tool registry.
+Do not commit:
 
-4. Fail explicitly
+```text
+.venv/
+venv/
+__pycache__/
+node_modules/
+.env
+```
 
-If Gemini or MCP is unavailable, the system should report the condition rather than silently pretending the operation succeeded.
+Dependencies should be installed on the target machine using:
 
-5. Keep secrets out of source control
+```powershell
+pip install -r requirements.txt
+```
 
-Credentials belong in environment configuration, never in Git.
+and:
 
-📚 Further Documentation
+```powershell
+npm install
+```
 
-START_HERE.md — project setup and getting started
+This keeps the GitHub repository lightweight and portable.
 
-architecture.md — architecture details
+---
 
-backend/requirements.txt — Python dependencies
+# 🚫 Files That Should Not Be Committed
 
-frontend/package.json — frontend dependencies
+Never upload:
 
-👨‍💻 Project
+```text
+.env
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+```
 
-Agentic Calculator MCP
+The `.gitignore` file should exclude these development-only files.
 
-Built as a practical demonstration of:
+---
 
-Generative AI
-     +
-Tool Calling
-     +
-Model Context Protocol
-     +
+# 🖥️ Running on Another Laptop
+
+To run the project on another development machine:
+
+```text
+1. Clone repository
+        ↓
+2. Install Python
+        ↓
+3. Install Node.js
+        ↓
+4. Create Python virtual environment
+        ↓
+5. Install backend requirements
+        ↓
+6. Create backend/.env
+        ↓
+7. Add Gemini API key
+        ↓
+8. Start FastAPI
+        ↓
+9. npm install
+        ↓
+10. npm run dev
+        ↓
+11. Open frontend
+```
+
+No `.venv` or `node_modules` folder needs to be transferred through GitHub.
+
+---
+
+# 📌 Compatibility
+
+The project is designed around:
+
+```text
+Python 3.11+
+MCP Python SDK 2.1.0
+Google GenAI SDK
 FastAPI
-     +
 React
-     +
-Deterministic Execution
+Vite
+```
 
-Core principle
+The MCP implementation uses the intended MCP v2 API surface.
 
-Let the model understand the problem. Let the tool solve the problem.
+---
 
-📄 License
+# 👨‍💻 Project Summary
 
-This project is distributed under the repository's MIT License.
+**Agentic Calculator MCP** demonstrates a practical AI agent architecture where:
+
+```text
+Natural Language
+       ↓
+     Gemini
+       ↓
+ Tool Selection
+       ↓
+   MCP Client
+       ↓
+   MCP Server
+       ↓
+Deterministic Calculator
+       ↓
+     Result
+       ↓
+ Natural Language
+```
+
+The project combines:
+
+**Generative AI + Tool Calling + MCP + FastAPI + React + Deterministic Execution**
+
+---
+
+# ⭐ Core Takeaway
+
+> **The model understands the problem.  
+> MCP connects the model to the capability.  
+> The external tool performs the deterministic work.**
+
+---
+
+## 📄 License
+
+This project is distributed under the **MIT License**.
+
+See [`LICENSE`](LICENSE) for the complete license text.
+
+---
+
+<p align="center">
+  <strong>🧮 Agentic Calculator MCP</strong>
+  <br>
+  AI Reasoning × MCP Tooling × Deterministic Execution
+</p>
