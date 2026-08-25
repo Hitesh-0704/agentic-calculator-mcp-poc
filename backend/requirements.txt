@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+google-genai
+mcp[cli]==2.1.0
+pydantic>=2,<3
+python-dotenv
+pytest
+pytest-asyncio
+httpx
